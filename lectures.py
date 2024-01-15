@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-lectures.py is for creating lecture note template in LaTeX
-"""
+
 import os
 import argparse
 from pathlib import Path
@@ -11,7 +9,7 @@ from appendtex import tex
 def parse_args():
     parser = argparse.ArgumentParser(description=
     """
-    Create a LaTeX-lecture note template from a given name arguments.
+    Create a LaTeX-lecture note template from a given name.
     ------------------------------
     Eample: python lectures.py Foo 
     
@@ -26,24 +24,34 @@ def parse_args():
     return args
 
 class Lectures:
+    """
+    This module is for creating lecture note template in LaTeX.
+    
+    Attributes
+    ----------
+    name: str
+        name of the being created directory and of the course.
+    
+    Methods
+    ----------
+    new_lecture():
+        create a course-name directory in lecture_note directory, 
+        create a main-tex file template and prerequisite LaTeX command in the file.
+    
+    """
     def __init__(self, name):
         self.dir_name = 'lecture_notes'
         self.dir_img_name = 'images'
         self.name = name
+        self.texclass = 'memoir'
+        self.lecture_title = name
+        self.author = 'ckk'
         
     def mk_dir(self):
         """Create lecture note directories"""
         impath = os.path.join(self.dir_name, self.name, self.dir_img_name)
         p = Path(impath)
         p.mkdir(exist_ok=True, parents=True)
-
-    # def mk_maintex_path(self):
-    #     #---- Create main tex path ----
-    #     self.texdir = os.path.join(self.dir_name, self.name)
-    #     self.mk_dir()
-    #     texpath = os.path.join(self.texdir, 'main_'+self.name+'.tex')
-
-        # return texpath
     
     def mk_mdfile(self, lec_content):
         mdpath = os.path.join(self.dir_name, self.name, self.name+'.md')
@@ -57,7 +65,16 @@ class Lectures:
     #TODO
     # read lecturename.md and append content in main_lecture.tex    
     
-    def write_TeX(self, file_path, file_content):      
+    def write_TeX(self, file_path, file_content):
+        """
+            This function is to create main-tex file, 
+            and write prerequisite LaTeX code in the file.
+            
+            Args
+            ----------
+            file_path: str
+            file_content: str
+        """ 
         try:
             if parse_args().overwrite:
                 Path(file_path).touch(exist_ok=True)
@@ -70,7 +87,8 @@ class Lectures:
         except FileExistsError:
             print(pathlib.PurePath(file_path).name + ' already exists')
     
-    def write_TeX_content(self, file_path):    
+    def write_TeX_content(self, file_path):
+        # Create files corresponding to the code in the main-tex body
         try:
             if parse_args().overwrite:
                 Path(file_path).touch(exist_ok=True)
@@ -80,24 +98,20 @@ class Lectures:
             print(pathlib.PurePath(file_path).name + ' already exists')
     
     def new_lecture(self):
-        # self.mk_dir()
-        texclass = 'memoir'
-        lecture_title = self.name
-        author = 'ckk'
+
         self.mk_dir()
 
-        self.texdir = os.path.join(self.dir_name, self.name)
-        main_filepath = os.path.join(self.texdir, 'main_'+self.name+'.tex')
+        texdir = os.path.join(self.dir_name, self.name)
+        main_filepath = os.path.join(texdir, 'main_'+self.name+'.tex')
 
-        texinfo = [texclass, lecture_title, author]
+        texinfo = [self.texclass, self.lecture_title, self.author]
         
         lns = tex(texinfo).append_main_TeX()
         filecontent = '\n\n'.join(lns)
         
         self.write_TeX(main_filepath, filecontent)
         
-        # create file 'lect01.tex'
-        content_path = os.path.join(self.texdir, 'lect01.tex')
+        content_path = os.path.join(texdir, 'lect01.tex')
         self.write_TeX_content(content_path)
 
         
